@@ -1,0 +1,6 @@
+require_relative 'azura/attribute'
+require_relative 'azura/relationship'
+require_relative 'azura/renderer'
+require_relative 'azura/resource'
+require_relative 'azura/type'
+require_relative 'azura/version'
