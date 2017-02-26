@@ -21,10 +21,10 @@ module Azura
         attributes << attr
       end
 
-      def attribute(name, getter: nil, type: nil, truncated: true)
+      def attribute(name, getter: nil, type: nil, truncated: true, assignable_on: [])
         r_getter = getter || name
         r_type = type || Azura::Type.create_type(model, r_getter)
-        attr = Azura::Attribute.new(name: name, getter: r_getter, type: r_type, truncated: truncated)
+        attr = Azura::Attribute.new(name: name, getter: r_getter, type: r_type, truncated: truncated, assignable_on: assignable_on)
         add_attribute(attr)
       end
 
@@ -71,7 +71,46 @@ module Azura
       end
     end
 
+    # Update / Create
+    def update(params)
+      attributes = assignable_attributes(:update)
+      data = extract_data(params, true)
+      assign_values(data, attributes)
+      model
+    end
+
+    def create(params)
+      attributes = assignable_attributes(:create)
+      data = extract_data(params, false)
+      assign_values(data, attributes)
+      model
+    end
+
     private
+
+    def assign_values(data, attributes)
+      data[:attributes].each do |name, value|
+        attr = attributes.detect { |a| a.name.to_s == name.to_s }
+        raise Azura::Errors::UnpermittedAttributeError, "Can't assign #{name}" if attr.nil?
+        attr.assign(self, value)
+      end
+    end
+
+    def extract_data(params, validate_id)
+      raw_attrs = params.require(:data).permit!.to_h
+      raise Azura::Errors::MissingTypeError unless (type = raw_attrs[:type]).present?
+      raise Azura::Errors::TypeMismatchError unless type == self.class.type
+      if validate_id
+        raise Azura::Errors::IDMismatchError unless raw_attrs[:id] == id
+      elsif raw_attrs[:id].present?
+        raise Azura::Errors::UnpermittedAttributeError, "Can't assign ID"
+      end
+      raw_attrs
+    end
+
+    def assignable_attributes(method)
+      self.class.attributes.select { |a| a.assignable_on.include?(method) }
+    end
 
     def generate_attributes
       {}.tap do |attrs|
