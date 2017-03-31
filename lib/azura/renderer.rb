@@ -21,6 +21,7 @@ module Azura
         root[:type] = object.class.type
         root[:attributes] = {}.tap do |attrs|
           object.class.attributes.sort_by(&:name).each do |attr|
+            next unless attr.rendered?
             next if truncated && !attr.truncated?
             value = attr.fetch(object)
             attrs[attr.name] = attr.type.format_value(value)

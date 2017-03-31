@@ -21,10 +21,10 @@ module Azura
         attributes << attr
       end
 
-      def attribute(name, getter: nil, type: nil, truncated: true, assignable_on: [])
+      def attribute(name, getter: nil, type: nil, truncated: true, assignable_on: [], rendered: true)
         r_getter = getter || name
         r_type = type || Azura::Type.create_type(model, r_getter)
-        attr = Azura::Attribute.new(name: name, getter: r_getter, type: r_type, truncated: truncated, assignable_on: assignable_on)
+        attr = Azura::Attribute.new(name: name, getter: r_getter, type: r_type, truncated: truncated, assignable_on: assignable_on, rendered: rendered)
         add_attribute(attr)
       end
 
