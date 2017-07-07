@@ -1,5 +1,6 @@
 require_relative 'azura/attribute'
 require_relative 'azura/errors'
+require_relative 'azura/formatter'
 require_relative 'azura/relationship'
 require_relative 'azura/renderer'
 require_relative 'azura/resource'
